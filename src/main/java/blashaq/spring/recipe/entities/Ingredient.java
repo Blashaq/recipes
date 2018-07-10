@@ -2,6 +2,7 @@ package blashaq.spring.recipe.entities;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Entity
 public class Ingredient {
@@ -15,8 +16,14 @@ public class Ingredient {
 
     @ManyToOne
     private Recipe recipe;
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     private UnitOfMeasure unitOfMeasure;
+
+    @ManyToMany
+    @JoinTable(name = "recipe_category",
+            joinColumns = @JoinColumn(name = "recipe_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<Category> categories;
 
     public UnitOfMeasure getUnitOfMeasure() {
         return unitOfMeasure;
@@ -56,5 +63,13 @@ public class Ingredient {
 
     public void setRecipe(Recipe recipe) {
         this.recipe = recipe;
+    }
+
+    public Set<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
     }
 }

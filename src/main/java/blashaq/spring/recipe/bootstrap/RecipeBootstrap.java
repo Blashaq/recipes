@@ -13,27 +13,32 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 @Component
 public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEvent> {
-    RecipeRepository recipeRepo;
-    UnitOfMeasureRepository uomRepo;
-    CategoryRepository categoryRepo;
+    private RecipeRepository recipeRepo;
+    private UnitOfMeasureRepository uomRepo;
+    private CategoryRepository categoryRepo;
 
     @Autowired
     public RecipeBootstrap(RecipeRepository recipeRepo, UnitOfMeasureRepository uomRepo, CategoryRepository categoryRepo) {
         this.recipeRepo = recipeRepo;
         this.uomRepo = uomRepo;
         this.categoryRepo = categoryRepo;
+
     }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        recipeRepo.saveAll(getRecipes());
+    }
+
+    private List<Recipe> getRecipes() {
         Recipe chickenRecipe = buildChickenRecipe();
-        recipeRepo.save(chickenRecipe);
         Recipe guacRecipe = buildGuacRecipe();
-        recipeRepo.save(guacRecipe);
+        return List.of(chickenRecipe, guacRecipe);
     }
 
     private Recipe buildGuacRecipe() {
@@ -83,17 +88,20 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
     }
 
     private Set<Ingredient> buildGuacIngredients() {
-        var tablespoon = uomRepo.findByUnit("tablespoon").get();
-        var dash = uomRepo.findByUnit("dash").get();
+        var tablespoon = uomRepo.findByUnit("tablespoon");
+        var dash = uomRepo.findByUnit("dash");
+        if (!tablespoon.isPresent() || !dash.isPresent()) {
+            throw new RuntimeException("missing data in database!");
+        }
         var avocados = new Ingredient("avocados", BigDecimal.valueOf(2), null);
-        var salt = new Ingredient("Kosher salt", BigDecimal.ONE, tablespoon);
-        var lemon = new Ingredient("fresh lime or lemon juice", BigDecimal.ONE, tablespoon);
-        var onion = new Ingredient("Minced red onion or thinly sliced green onion", BigDecimal.valueOf(2), tablespoon);
+        var salt = new Ingredient("Kosher salt", BigDecimal.ONE, tablespoon.get());
+        var lemon = new Ingredient("fresh lime or lemon juice", BigDecimal.ONE, tablespoon.get());
+        var onion = new Ingredient("Minced red onion or thinly sliced green onion", BigDecimal.valueOf(2), tablespoon.get());
         var cilantro = new Ingredient("cilantro (leaves and tender stems), finely chopped", BigDecimal.ONE, null);
-        var pepper = new Ingredient("freshly grated black pepper", BigDecimal.ONE, dash);
+        var pepper = new Ingredient("freshly grated black pepper", BigDecimal.ONE, dash.get());
         var tomato = new Ingredient("ripe tomato, seeds and pulp removed, chopped", BigDecimal.valueOf(0.5), null);
-        return Set.of(avocados, salt, lemon, onion, cilantro, pepper, tomato);
 
+        return Set.of(avocados, salt, lemon, onion, cilantro, pepper, tomato);
     }
 
     private Recipe buildChickenRecipe() {
@@ -104,33 +112,7 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
         chickenRecipe.setDifficulty(Difficulty.EASY);
         chickenRecipe.setPrepTime(20);
         chickenRecipe.setServings(4);
-        chickenRecipe.setUrl("https://www.simplyrecipes.com/recipes/spicy_grilled_chicken_tacos/");
-        var chickenNotes = buildChickenNotes();
-        chickenNotes.setRecipe(chickenRecipe);
-        chickenRecipe.setNotes(chickenNotes);
-        return chickenRecipe;
-    }
-
-    private Set<Ingredient> buildChickenIngredients() throws RuntimeException {
-        var tablespoon = uomRepo.findByUnit("tablespoon").get();
-        var teaspoon = uomRepo.findByUnit("teaspoon").get();
-        var clove = uomRepo.findByUnit("clove").get();
-        var pound = uomRepo.findByUnit("pound").get();
-        var anchoChili = new Ingredient("ancho chili powder", BigDecimal.valueOf(2), tablespoon);
-        var driedOregano = new Ingredient("dried oregano", BigDecimal.ONE, teaspoon);
-        var cumin = new Ingredient("dried cumin", BigDecimal.ONE, teaspoon);
-        var sugar = new Ingredient("sugar", BigDecimal.ONE, teaspoon);
-        var salt = new Ingredient("salt", BigDecimal.valueOf(0.5), teaspoon);
-        var garlic = new Ingredient("garlic, finely chopped", BigDecimal.ONE, clove);
-        var orange = new Ingredient("finely grated orange zest", BigDecimal.ONE, tablespoon);
-        var olive = new Ingredient("olive oil", BigDecimal.valueOf(2), tablespoon);
-        var chicken = new Ingredient("skinless, boneless chicken thighs", BigDecimal.valueOf(1, 25), pound);
-        return Set.of(anchoChili, driedOregano, cumin, sugar, salt, garlic, orange, olive, chicken);
-    }
-
-    private Notes buildChickenNotes() {
-        var notes = new Notes();
-        notes.setRecipeNotes("1 Prepare a gas or charcoal grill for medium-high, direct heat.\n" +
+        chickenRecipe.setDirections("1 Prepare a gas or charcoal grill for medium-high, direct heat.\n" +
                 "\n" +
                 "2 Make the marinade and coat the chicken: In a large bowl, stir together the chili powder, oregano, cumin, sugar, salt, garlic and orange zest. Stir in the orange juice and olive oil to make a loose paste. Add the chicken to the bowl and toss to coat all over.\n" +
                 "\n" +
@@ -145,6 +127,58 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
                 "5 Assemble the tacos: Slice the chicken into strips. On each tortilla, place a small handful of arugula." +
                 " Top with chicken slices, sliced avocado, radishes, tomatoes, and onion slices. Drizzle with the thinned sour cream." +
                 " Serve with lime wedges.");
+        chickenRecipe.setUrl("https://www.simplyrecipes.com/recipes/spicy_grilled_chicken_tacos/");
+        var chickenNotes = buildChickenNotes();
+        chickenNotes.setRecipe(chickenRecipe);
+        chickenRecipe.setNotes(chickenNotes);
+        chickenRecipe.setCategories(Set.of(categoryRepo.findByDescription("american").get()));
+        return chickenRecipe;
+    }
+
+    private Set<Ingredient> buildChickenIngredients() throws RuntimeException {
+        var tablespoon = uomRepo.findByUnit("tablespoon");
+        var teaspoon = uomRepo.findByUnit("teaspoon");
+        var clove = uomRepo.findByUnit("clove");
+        var pound = uomRepo.findByUnit("pound");
+        if (!tablespoon.isPresent() ||
+                !teaspoon.isPresent() ||
+                !clove.isPresent() ||
+                !pound.isPresent()) {
+            throw new RuntimeException("Missing data!");
+        }
+
+        var anchoChili = new Ingredient("ancho chili powder", BigDecimal.valueOf(2), tablespoon.get());
+        var driedOregano = new Ingredient("dried oregano", BigDecimal.ONE, teaspoon.get());
+        var cumin = new Ingredient("dried cumin", BigDecimal.ONE, teaspoon.get());
+        var sugar = new Ingredient("sugar", BigDecimal.ONE, teaspoon.get());
+        var salt = new Ingredient("salt", BigDecimal.valueOf(0.5), teaspoon.get());
+        var garlic = new Ingredient("garlic, finely chopped", BigDecimal.ONE, clove.get());
+        var orange = new Ingredient("finely grated orange zest", BigDecimal.ONE, tablespoon.get());
+        var olive = new Ingredient("olive oil", BigDecimal.valueOf(2), tablespoon.get());
+        var chicken = new Ingredient("skinless, boneless chicken thighs", BigDecimal.valueOf(1, 25), pound.get());
+        return Set.of(anchoChili, driedOregano, cumin, sugar, salt, garlic, orange, olive, chicken);
+    }
+
+    private Notes buildChickenNotes() {
+        var notes = new Notes();
+        notes.setRecipeNotes("We have a family motto and it is this: Everything goes better in a tortilla.\n" +
+                "\n" +
+                "Any and every kind of leftover can go inside a warm tortilla, usually with a healthy dose of pickled jalapenos. I can always sniff out a late-night snacker when the aroma of tortillas heating in a hot pan on the stove comes wafting through the house.\n" +
+                "\n" +
+                "Today’s tacos are more purposeful – a deliberate meal instead of a secretive midnight snack!\n" +
+                "\n" +
+                "\n" +
+                "First, I marinate the chicken briefly in a spicy paste of ancho chile powder, oregano, cumin, and sweet orange juice while the grill is heating. You can also use this time to prepare the taco toppings.\n" +
+                "\n" +
+                "Grill the chicken, then let it rest while you warm the tortillas. Now you are ready to assemble the tacos and dig in. The whole meal comes together in about 30 minutes!\n" +
+                "\n" +
+                "Spicy Grilled Chicken TacosThe ancho chiles I use in the marinade are named for their wide shape. They are large, have a deep reddish brown color when dried, and are mild in flavor with just a hint of heat. You can find ancho chile powder at any markets that sell Mexican ingredients, or online.\n" +
+                "\n" +
+                "I like to put all the toppings in little bowls on a big platter at the center of the table: avocados, radishes, tomatoes, red onions, wedges of lime, and a sour cream sauce. I add arugula, as well – this green isn’t traditional for tacos, but we always seem to have some in the fridge and I think it adds a nice green crunch to the tacos.\n" +
+                "\n" +
+                "Everyone can grab a warm tortilla from the pile and make their own tacos just they way they like them.\n" +
+                "\n" +
+                "You could also easily double or even triple this recipe for a larger party. A taco and a cold beer on a warm day? Now that’s living!");
         return notes;
     }
 }

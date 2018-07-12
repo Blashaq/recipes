@@ -14,16 +14,35 @@ public class Recipe {
     private int servings;
     private String source;
     private String url;
+
+    @Lob
     private String directions;
+
+    @ManyToMany
+    @JoinTable(name = "recipe_category",
+            joinColumns = @JoinColumn(name = "recipe_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<Category> categories;
+
     @Lob
     private byte[] image;
+
     @OneToOne(cascade = CascadeType.ALL)
     private Notes notes;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "recipe")
     private Set<Ingredient> ingredients;
 
     @Enumerated(value = EnumType.STRING)
     private Difficulty difficulty;
+
+    public Set<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
+    }
 
     public Difficulty getDifficulty() {
         return difficulty;

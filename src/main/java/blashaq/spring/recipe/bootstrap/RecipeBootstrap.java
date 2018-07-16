@@ -7,6 +7,7 @@ import blashaq.spring.recipe.entities.Recipe;
 import blashaq.spring.recipe.repositories.CategoryRepository;
 import blashaq.spring.recipe.repositories.RecipeRepository;
 import blashaq.spring.recipe.repositories.UnitOfMeasureRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Component
 public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEvent> {
     private RecipeRepository recipeRepo;
@@ -32,16 +34,19 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        log.debug("saving recipes...");
         recipeRepo.saveAll(getRecipes());
     }
 
     private List<Recipe> getRecipes() {
+        log.debug("collecting recipes...");
         Recipe chickenRecipe = buildChickenRecipe();
         Recipe guacRecipe = buildGuacRecipe();
         return List.of(chickenRecipe, guacRecipe);
     }
 
     private Recipe buildGuacRecipe() {
+        log.debug("building guacamole recipe...");
         Recipe guacRecipe = new Recipe();
         guacRecipe.setIngredients(buildGuacIngredients());
         guacRecipe.setDescription("Perfect Guacamole");
@@ -64,7 +69,6 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
         guacRecipe.setServings(4);
         guacRecipe.setUrl("https://www.simplyrecipes.com/recipes/perfect_guacamole/");
         var guacNotes = buildGuacNotes();
-        guacNotes.setRecipe(guacRecipe);
         guacRecipe.setNotes(guacNotes);
         guacRecipe.setCategories(Set.of(categoryRepo.findByDescription("american").get(),
                 categoryRepo.findByDescription("mexican").get()));
@@ -105,6 +109,7 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
     }
 
     private Recipe buildChickenRecipe() {
+        log.debug("building chicken recipe...");
         Recipe chickenRecipe = new Recipe();
         chickenRecipe.setIngredients(buildChickenIngredients());
         chickenRecipe.setDescription("Spicy Grilled Chicken Tacos ");
@@ -129,7 +134,6 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
                 " Serve with lime wedges.");
         chickenRecipe.setUrl("https://www.simplyrecipes.com/recipes/spicy_grilled_chicken_tacos/");
         var chickenNotes = buildChickenNotes();
-        chickenNotes.setRecipe(chickenRecipe);
         chickenRecipe.setNotes(chickenNotes);
         chickenRecipe.setCategories(Set.of(categoryRepo.findByDescription("american").get()));
         return chickenRecipe;

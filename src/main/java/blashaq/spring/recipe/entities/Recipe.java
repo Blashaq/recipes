@@ -1,12 +1,14 @@
 package blashaq.spring.recipe.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(exclude = {"ingredients", "notes", "categories"})
 @Entity
 public class Recipe {
     @Id
@@ -49,5 +51,16 @@ public class Recipe {
     public void setNotes(Notes notes) {
         this.notes = notes;
         notes.setRecipe(this);
+    }
+
+    public void setIngredients(Set<Ingredient> ingredients) {
+        this.ingredients = ingredients;
+        for (var i : ingredients) {
+            i.setRecipe(this);
+        }
+    }
+
+    public String toString() {
+        return "Recipe(id=" + this.getId() + ", description=" + this.getDescription() + ", prepTime=" + this.getPrepTime() + ", cookTime=" + this.getCookTime() + ", servings=" + this.getServings();
     }
 }

@@ -20,4 +20,11 @@ public class Category {
     @ManyToMany(mappedBy = "categories")
     private Set<Recipe> recipes = new HashSet<>();
 
+    public void setRecipes(Set<Recipe> recipes) {
+        this.recipes = recipes;
+        for (var recipe : recipes) {
+            recipe.getCategories().add(this);
+        }
+    }
+
 }

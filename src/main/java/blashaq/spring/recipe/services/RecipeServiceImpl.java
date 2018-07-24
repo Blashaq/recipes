@@ -27,4 +27,12 @@ public class RecipeServiceImpl implements RecipeService {
         recipeRepo.findAll().forEach(recipes::add);
         return recipes;
     }
+
+    public Recipe getRecipeById(long id) {
+        var recipe = recipeRepo.findById(id);
+        if (!recipe.isPresent()) {
+            throw new RuntimeException("unexpected missing data!");
+        }
+        return recipe.get();
+    }
 }

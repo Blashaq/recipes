@@ -7,3 +7,4 @@ INSERT INTO unit_of_measure (unit) VALUES ('teaspoon');
 INSERT INTO unit_of_measure (unit) VALUES ('clove');
 INSERT INTO unit_of_measure (unit) VALUES ('pound');
 INSERT INTO unit_of_measure (unit) VALUES ('dash');
+INSERT INTO unit_of_measure (unit) VALUES ('each');

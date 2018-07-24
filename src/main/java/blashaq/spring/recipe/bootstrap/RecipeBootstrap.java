@@ -96,16 +96,17 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
     private Set<Ingredient> buildGuacIngredients() {
         var tablespoon = uomRepo.findByUnit("tablespoon");
         var dash = uomRepo.findByUnit("dash");
+        var each = uomRepo.findByUnit("each");
         if (!tablespoon.isPresent() || !dash.isPresent()) {
             throw new RuntimeException("missing data in database!");
         }
-        var avocados = new Ingredient("avocados", BigDecimal.valueOf(2), null);
+        var avocados = new Ingredient("avocados", BigDecimal.valueOf(2), each.get());
         var salt = new Ingredient("Kosher salt", BigDecimal.ONE, tablespoon.get());
         var lemon = new Ingredient("fresh lime or lemon juice", BigDecimal.ONE, tablespoon.get());
         var onion = new Ingredient("Minced red onion or thinly sliced green onion", BigDecimal.valueOf(2), tablespoon.get());
-        var cilantro = new Ingredient("cilantro (leaves and tender stems), finely chopped", BigDecimal.ONE, null);
+        var cilantro = new Ingredient("cilantro (leaves and tender stems), finely chopped", BigDecimal.ONE, each.get());
         var pepper = new Ingredient("freshly grated black pepper", BigDecimal.ONE, dash.get());
-        var tomato = new Ingredient("ripe tomato, seeds and pulp removed, chopped", BigDecimal.valueOf(0.5), null);
+        var tomato = new Ingredient("ripe tomato, seeds and pulp removed, chopped", BigDecimal.valueOf(0.5), each.get());
 
         return Set.of(avocados, salt, lemon, onion, cilantro, pepper, tomato);
     }

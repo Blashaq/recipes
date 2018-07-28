@@ -1,5 +1,8 @@
 package blashaq.spring.recipe.test.unit.services;
 
+import blashaq.spring.recipe.commands.RecipeCommand;
+import blashaq.spring.recipe.converters.RecipeCommandToRecipe;
+import blashaq.spring.recipe.converters.RecipeToRecipeCommand;
 import blashaq.spring.recipe.entities.Recipe;
 import blashaq.spring.recipe.repositories.RecipeRepository;
 import blashaq.spring.recipe.services.RecipeServiceImpl;
@@ -19,19 +22,28 @@ public class RecipeServiceImplTest {
     private RecipeServiceImpl recipeService;
 
     @Mock
+    private RecipeCommandToRecipe recipeCommandToRecipe;
+    @Mock
+    private RecipeToRecipeCommand recipeToRecipeCommand;
+    @Mock
     private RecipeRepository recipeRepo;
 
-    private long recId = 5l;
+
+    private Long recId = 5l;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        recipeService = new RecipeServiceImpl(recipeRepo);
+        recipeService = new RecipeServiceImpl(recipeRepo, recipeCommandToRecipe, recipeToRecipeCommand);
         var recipe = new Recipe();
         recipe.setId(recId);
+        var recipeCommand = new RecipeCommand();
+        recipeCommand.setId(recId);
         Set<Recipe> recipes = Set.of(recipe);
         when(recipeRepo.findAll()).thenReturn(recipes);
         when(recipeRepo.findById(recId)).thenReturn(Optional.of(recipe));
+        when(recipeToRecipeCommand.convert(any(Recipe.class))).thenReturn(recipeCommand);
+        when(recipeCommandToRecipe.convert(any(RecipeCommand.class))).thenReturn(recipe);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package blashaq.spring.recipe.services;
 
+import blashaq.spring.recipe.commands.RecipeCommand;
 import blashaq.spring.recipe.entities.Recipe;
 import org.springframework.stereotype.Service;
 
@@ -11,4 +12,6 @@ public interface RecipeService {
     Set<Recipe> getRecipes();
 
     Recipe getRecipeById(long id);
+
+    RecipeCommand saveRecipeCommand(RecipeCommand command);
 }

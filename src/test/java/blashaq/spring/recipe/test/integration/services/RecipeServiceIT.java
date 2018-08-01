@@ -4,7 +4,6 @@ import blashaq.spring.recipe.converters.RecipeCommandToRecipe;
 import blashaq.spring.recipe.converters.RecipeToRecipeCommand;
 import blashaq.spring.recipe.repositories.RecipeRepository;
 import blashaq.spring.recipe.services.RecipeService;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,6 @@ public class RecipeServiceIT {
         assertEquals(testRecipe.getCategories().size(), savedRecipeCommand.getCategories().size());
         assertEquals(testRecipe.getIngredients().size(), savedRecipeCommand.getIngredients().size());
         assertEquals(testRecipe.getDescription(), savedRecipeCommand.getDescription());
-
     }
 
 }

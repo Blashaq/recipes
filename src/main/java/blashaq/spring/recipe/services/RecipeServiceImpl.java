@@ -36,7 +36,7 @@ public class RecipeServiceImpl implements RecipeService {
         return recipes;
     }
 
-    public Recipe getRecipeById(long id) {
+    public Recipe findRecipeById(long id) {
         var recipe = recipeRepo.findById(id);
         if (!recipe.isPresent()) {
             throw new RuntimeException("unexpected missing data!");
@@ -51,6 +51,12 @@ public class RecipeServiceImpl implements RecipeService {
         log.debug("saving recipe!");
         Recipe savedRecipe = recipeRepo.save(detachedRecipe);
         return recipeToRecipeCommand.convert(savedRecipe);
+    }
+
+    @Override
+    public RecipeCommand findCommandById(long id) {
+        var recipe = findRecipeById(id);
+        return recipeToRecipeCommand.convert(recipe);
     }
 
 

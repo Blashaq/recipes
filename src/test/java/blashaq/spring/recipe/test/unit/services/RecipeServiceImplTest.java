@@ -55,13 +55,13 @@ public class RecipeServiceImplTest {
 
     @Test
     public void getRecipeById() {
-        var recipe = recipeService.getRecipeById(recId);
+        var recipe = recipeService.findRecipeById(recId);
         assertEquals(recipe.getId(), recId);
     }
 
     @Test(expected = RuntimeException.class)
     public void errorOnBadId() {
-        recipeService.getRecipeById(9090909l);
+        recipeService.findRecipeById(9090909l);
     }
 
 }

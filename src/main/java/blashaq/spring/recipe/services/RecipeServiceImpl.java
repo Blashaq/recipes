@@ -29,8 +29,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Set<Recipe> getRecipes() {
-        log.debug("I am in the service!\n" +
-                "Getting recipes!");
+        log.debug("Getting recipes!");
         Set<Recipe> recipes = new HashSet<>();
         recipeRepo.findAll().forEach(recipes::add);
         return recipes;
@@ -59,5 +58,8 @@ public class RecipeServiceImpl implements RecipeService {
         return recipeToRecipeCommand.convert(recipe);
     }
 
-
+    @Override
+    public void deleteRecipe(long id) {
+        recipeRepo.deleteById(id);
+    }
 }

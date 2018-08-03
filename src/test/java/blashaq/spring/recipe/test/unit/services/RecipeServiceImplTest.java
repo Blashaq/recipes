@@ -64,4 +64,11 @@ public class RecipeServiceImplTest {
         recipeService.findRecipeById(9090909l);
     }
 
+    @Test
+    public void deleteRecipe() {
+        recipeService.deleteRecipe(recId);
+        verify(recipeRepo, times(1)).deleteById(recId);
+
+    }
+
 }

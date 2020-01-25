@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/openjdk:10-jdk
+      - image: circleci/openjdk:10-jdk@sha256:15fd83984879270145a8a25391df17a599e7c6b599f4a55e06e23f015f0e356c
       
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -21,6 +21,10 @@ jobs:
       MAVEN_OPTS: -Xmx1024m
     
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "50:e6:1e:bf:48:5b:80:d8:8c:bf:4e:fc:9a:54:59:3b"
+            
       - checkout
 
       # Download and cache dependencies
@@ -38,4 +42,5 @@ jobs:
           key: v1-dependencies-{{ checksum "pom.xml" }}
         
       # run tests!
+      - run: mvn test
       - run: mvn verify

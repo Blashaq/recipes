@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 public class UomToUomCommandTest {
 
     private static final String DESCRIPTION = "description";
-    private static final Long LONG_VALUE = new Long(1L);
+    private static final Long LONG_VALUE = Long.valueOf(1L);
 
     UomToUomCommand converter;
 

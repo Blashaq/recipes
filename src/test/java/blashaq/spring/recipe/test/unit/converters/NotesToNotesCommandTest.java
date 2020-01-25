@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 
 public class NotesToNotesCommandTest {
 
-    private static final Long ID_VALUE = new Long(1L);
+    private static final Long ID_VALUE = Long.valueOf(1L);
     private static final String RECIPE_NOTES = "Notes";
     NotesToNotesCommand converter;
 
@@ -21,15 +21,15 @@ public class NotesToNotesCommandTest {
 
     @Test
     public void convert() throws Exception {
-        //given
+        // given
         Notes notes = new Notes();
         notes.setId(ID_VALUE);
         notes.setRecipeNotes(RECIPE_NOTES);
 
-        //when
+        // when
         NotesCommand notesCommand = converter.convert(notes);
 
-        //then
+        // then
         assertEquals(ID_VALUE, notesCommand.getId());
         assertEquals(RECIPE_NOTES, notesCommand.getRecipeNotes());
     }
